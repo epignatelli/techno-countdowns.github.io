@@ -5,6 +5,7 @@ layout: null
 
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,33 +13,24 @@ layout: null
   <meta name="description" content="{{ site.description }}">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root { --fg:#eaeaea; --bg:#0c0c0f; --muted:#9aa0a6; --card:#15151a; --pill:#1f2937; --accent:#7c3aed; }
-    *{box-sizing:border-box} html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif}
-    a{color:var(--fg);text-decoration:none} a:hover{opacity:.88}
-    header{max-width:1100px;margin:32px auto 8px;padding:0 16px}
-    .title{font-weight:800;font-size:clamp(24px,4vw,44px);letter-spacing:-.02em}
-    .subtitle{color:var(--muted);margin-top:6px}
-    .controls{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
-    select,input,button{background:var(--card);color:var(--fg);border:1px solid #2a2a33;border-radius:10px;padding:10px 12px}
-    button.pill{background:var(--pill); cursor:pointer;}
-    main{max-width:1100px;margin:0 auto;padding:12px 16px 60px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-    .card{background:var(--card);border:1px solid #202028;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
-    .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
-    .pill{background:var(--pill);padding:4px 10px;border-radius:999px;color:#cbd5e1;font-size:12px}
-    .count{font-weight:800;font-size:28px}
-    .deadline{color:#c7a6ff}
-    footer{max-width:1100px;margin:22px auto;padding:0 16px;color:var(--muted);font-size:13px}
-  </style>
+  <link rel="stylesheet" href="{{ '/assets/styles.css' | relative_url }}">
 </head>
+
 <body>
   <header>
     <div class="title">Techno Deadlines</div>
-    <div class="subtitle">Countdowns for presales, ticket tiers, camping & shuttle bookings, refund cutoffs, and more.</div>
+    <div class="subtitle">Countdowns for presales, ticket tiers, camping & shuttle bookings, refund cutoffs, and more.
+    </div>
     <div class="controls">
+      <!-- view toggle -->
+      <div class="toggle" role="tablist" aria-label="View">
+        <button id="view-list" class="active" aria-pressed="true">List</button>
+        <button id="view-board" aria-pressed="false">Board</button>
+      </div>
+
+      <!-- filters -->
       <input id="q" placeholder="Search festival or city…" />
-      <select id="type">
+      <select id="type" aria-label="Deadline type">
         <option value="">All deadline types</option>
         <option>presale_signup</option>
         <option>presale</option>
@@ -53,176 +45,227 @@ layout: null
         <option>lineup_drop</option>
         <option>other</option>
       </select>
-      <select id="month">
+      <select id="month" aria-label="Festival month">
         <option value="">Any month</option>
       </select>
-      <select id="country">
+      <select id="country" aria-label="Country">
         <option value="">Any country</option>
       </select>
-      <button id="dlics" class="pill">Download .ics (all deadlines)</button>
+
+      <!-- global ICS for filtered view (kept) -->
+      <button id="dlics" class="pill">Download .ics (filtered)</button>
     </div>
   </header>
 
   <main>
-    <div id="list" class="grid"></div>
+    <!-- LIST view table -->
+    <div class="table-wrap" id="list-wrap" style="display:block">
+      <table id="fest-table">
+        <thead>
+          <tr>
+            <th>Festival</th>
+            <th>Place</th>
+            <th>Festival dates</th>
+            <th>Next deadline</th>
+            <th>When</th>
+            <th>Countdown</th>
+            <th><!-- per-festival ics --></th>
+          </tr>
+        </thead>
+        <tbody id="list"></tbody>
+      </table>
+    </div>
+
+    <!-- BOARD view grid -->
+    <div id="board-wrap" style="display:none">
+      <div id="grid" class="grid"></div>
+    </div>
   </main>
 
   <footer>
-    Inspired by <a href="https://aideadlin.es/">ai-deadlines</a>. Data is community‑maintained — verify details on the official festival websites.
+    Inspired by <a href="https://aideadlin.es/">ai-deadlines</a>. Data is community-maintained — verify details on
+    official festival websites.
   </footer>
 
   <script>
     const DATA = {{ site.data.festivals | jsonify }};
+    const QS = s => document.querySelector(s);
+    const acid = getComputedStyle(document.documentElement).getPropertyValue('--acid') || '#39ff14';
 
-    // Helper: parse ISO or "YYYY-MM-DD HH:MM" (display in local TZ)
-    function parseAt(s) { return s ? new Date(s.replace(/-/g,'/').replace(' ', 'T')+ (s.length<=10? 'T00:00:00':'') ) : null; }
-
+    // --- Dates & helpers ---
+    function parseAt(s) { return s ? new Date(s.replace(/-/g, '/').replace(' ', 'T') + (s.length <= 10 ? 'T00:00:00' : '')) : null; }
     function nextDeadline(f) {
       if (!f.deadlines) return null;
       const now = new Date();
-      const upcoming = f.deadlines
-        .map(d => ({...d, atDate: parseAt(d.at)}))
-        .filter(d => d.atDate && d.atDate > now)
-        .sort((a,b) => a.atDate - b.atDate);
-      return upcoming[0] || null;
+      const up = f.deadlines.map(d => ({ ...d, atDate: parseAt(d.at) }))
+        .filter(d => d.atDate && d.atDate > now).sort((a, b) => a.atDate - b.atDate);
+      return up[0] || null;
     }
-
-    function daysLeft(target) {
-      const ms = target - new Date();
-      if (ms <= 0) return 'now';
-      const d = Math.floor(ms/86400000), h = Math.floor((ms%86400000)/3600000);
+    function allDeadlinesSorted(f) {
+      return (f.deadlines || [])
+        .map(d => ({ ...d, atDate: parseAt(d.at) }))
+        .filter(d => d.atDate)
+        .sort((a, b) => a.atDate - b.atDate);
+    }
+    function daysLeft(t) {
+      const ms = t - new Date(); if (ms <= 0) return 'now';
+      const d = Math.floor(ms / 86400000), h = Math.floor((ms % 86400000) / 3600000);
       return `${d}d ${h}h`;
     }
 
-    // Populate month & country filters
-    (function initFilters(){
-      const month = document.getElementById('month');
-      const country = document.getElementById('country');
-      const months = new Set();
-      const countries = new Set();
+    // --- Filters ---
+    (function initFilters() {
+      const month = QS('#month'), country = QS('#country');
+      const months = new Set(), countries = new Set();
       DATA.forEach(f => {
-        if (f.start) { months.add(new Date(f.start.replace(/-/g,'/')).toLocaleString(undefined,{month:'long'})); }
-        const m = /,\s*([A-Z]{2})$/.exec(f.place||'');
-        if (m) countries.add(m[1]);
+        if (f.start) { months.add(new Date(f.start.replace(/-/g, '/')).toLocaleString(undefined, { month: 'long' })); }
+        const m = /,\s*([A-Z]{2})$/.exec(f.place || ''); if (m) countries.add(m[1]);
       });
-      [...months].sort((a,b)=>new Date(`${a} 1, 2000`) - new Date(`${b} 1, 2000`)).forEach(m=>{ const o=document.createElement('option'); o.textContent=m; o.value=m; month.appendChild(o); });
-      [...countries].sort().forEach(c=>{ const o=document.createElement('option'); o.textContent=c; o.value=c; country.appendChild(o); });
+      [...months].sort((a, b) => new Date(`${a} 1, 2000`) - new Date(`${b} 1, 2000`))
+        .forEach(m => { const o = document.createElement('option'); o.textContent = m; o.value = m; month.appendChild(o); });
+      [...countries].sort().forEach(c => { const o = document.createElement('option'); o.textContent = c; o.value = c; country.appendChild(o); });
     })();
 
-    function render() {
-      const q = document.getElementById('q').value.toLowerCase();
-      const typ = document.getElementById('type').value;
-      const mon = document.getElementById('month').value;
-      const ctry = document.getElementById('country').value;
-      const list = document.getElementById('list');
-      list.innerHTML = '';
-
-      const items = DATA.map(f => ({ f, nd: nextDeadline(f) }))
-        .filter(({f, nd}) => (
-          (!q || (f.title||'').toLowerCase().includes(q) || (f.place||'').toLowerCase().includes(q)) &&
-          (!typ || (nd && nd.type===typ)) &&
-          (!mon || (f.start && new Date(f.start.replace(/-/g,'/')).toLocaleString(undefined,{month:'long'})===mon)) &&
-          (!ctry || ((/,[\s]*([A-Z]{2})$/.exec(f.place||'')||[])[1]===ctry))
+    function filteredItems() {
+      const q = (QS('#q').value || '').toLowerCase();
+      const typ = QS('#type').value;
+      const mon = QS('#month').value;
+      const ctry = QS('#country').value;
+      return DATA.map(f => ({ f, nd: nextDeadline(f) }))
+        .filter(({ f, nd }) => (
+          (!q || (f.title || '').toLowerCase().includes(q) || (f.place || '').toLowerCase().includes(q)) &&
+          (!typ || (nd && nd.type === typ)) &&
+          (!mon || (f.start && new Date(f.start.replace(/-/g, '/')).toLocaleString(undefined, { month: 'long' }) === mon)) &&
+          (!ctry || ((/,[\s]*([A-Z]{2})$/.exec(f.place || '') || [])[1] === ctry))
         ))
-        .sort((a,b) => {
-          // sort by next deadline, then start date
+        .sort((a, b) => {
           if (a.nd && b.nd) return a.nd.atDate - b.nd.atDate;
           if (a.nd && !b.nd) return -1; if (!a.nd && b.nd) return 1;
-          const as = a.f.start ? new Date(a.f.start.replace(/-/g,'/')) : new Date(8640000000000000);
-          const bs = b.f.start ? new Date(b.f.start.replace(/-/g,'/')) : new Date(8640000000000000);
+          const as = a.f.start ? new Date(a.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
+          const bs = b.f.start ? new Date(b.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
           return as - bs;
         });
+    }
 
-      items.forEach(({f, nd}) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        const top = document.createElement('div'); top.className='row';
+    // --- ICS helpers ---
+    function icsEscape(s) { return (s || '').toString().replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;'); }
+    function dtstamp(d) { const p = n => String(n).padStart(2, '0'); return d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + 'T' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + p(d.getUTCSeconds()) + 'Z'; }
+    function eventICS(f, d) {
+      const start = d.atDate, end = new Date(start.getTime() + 3600000);
+      const uid = `${(f.id || f.title)}-${d.type}-${dtstamp(start)}@technodeadlines`;
+      const summary = `${f.title} — ${d.label}`, loc = f.place || '', url = f.link || '';
+      const desc = `Type: ${d.type}${url ? "\\n" + url : ""}`;
+      return ['BEGIN:VEVENT', `UID:${uid}`, `DTSTAMP:${dtstamp(new Date())}`, `DTSTART:${dtstamp(start)}`, `DTEND:${dtstamp(end)}`, `SUMMARY:${icsEscape(summary)}`, `LOCATION:${icsEscape(loc)}`, `DESCRIPTION:${icsEscape(desc)}`, 'END:VEVENT'].join('\n');
+    }
+    function buildICS(events) {
+      return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Techno Deadlines//EN', 'CALSCALE:GREGORIAN', events.join('\n'), 'END:VCALENDAR'].join('\n');
+    }
+    function downloadBlob(text, filename) {
+      const blob = new Blob([text], { type: 'text/calendar;charset=utf-8' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    }
+    function downloadICSFiltered() {
+      const items = filteredItems();
+      const all = [];
+      items.forEach(({ f }) => allDeadlinesSorted(f).forEach(d => all.push(eventICS(f, d))));
+      downloadBlob(buildICS(all), 'techno-deadlines.ics');
+    }
+    function downloadFestivalICS(f) {
+      const events = allDeadlinesSorted(f).map(d => eventICS(f, d));
+      const slug = (f.id || f.title || 'festival').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      downloadBlob(buildICS(events), `${slug}.ics`);
+    }
+
+    // --- Renderers ---
+    function renderList() {
+      const tbody = QS('#list'); tbody.innerHTML = '';
+      filteredItems().forEach(({ f, nd }) => {
+        const tr = document.createElement('tr');
+
+        const tdFest = document.createElement('td'); tdFest.setAttribute('data-label', 'Festival');
+        const name = f.link ? `<a class="fest-link" href="${f.link}" target="_blank" rel="noopener">${f.title}</a>` : `<span class="fest-link">${f.title}</span>`;
+        tdFest.innerHTML = name; tr.appendChild(tdFest);
+
+        const tdPlace = document.createElement('td'); tdPlace.setAttribute('data-label', 'Place');
+        tdPlace.innerHTML = f.place ? `<span>${f.place}</span>` : '<span class="muted">—</span>'; tr.appendChild(tdPlace);
+
+        const tdDates = document.createElement('td'); tdDates.setAttribute('data-label', 'Festival dates');
+        tdDates.innerHTML = f.date ? `<span>${f.date}</span>` : '<span class="muted">—</span>'; tr.appendChild(tdDates);
+
+        const tdLabel = document.createElement('td'); tdLabel.setAttribute('data-label', 'Next deadline');
+        tdLabel.innerHTML = nd ? `<span class="badge">${nd.label}</span>` : '<span class="muted">—</span>'; tr.appendChild(tdLabel);
+
+        const tdWhen = document.createElement('td'); tdWhen.setAttribute('data-label', 'When');
+        tdWhen.textContent = nd ? nd.atDate.toLocaleString() : '—'; tr.appendChild(tdWhen);
+
+        const tdCountdown = document.createElement('td'); tdCountdown.setAttribute('data-label', 'Countdown');
+        tdCountdown.innerHTML = nd ? `<span class="count">${daysLeft(nd.atDate)}</span>` : '—'; tr.appendChild(tdCountdown);
+
+        const tdICS = document.createElement('td'); tdICS.setAttribute('data-label', 'Download');
+        const btn = document.createElement('button'); btn.className = 'btn'; btn.type = 'button'; btn.textContent = 'Download .ics';
+        btn.addEventListener('click', () => downloadFestivalICS(f));
+        tdICS.appendChild(btn); tr.appendChild(tdICS);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderBoard() {
+      const grid = QS('#grid'); grid.innerHTML = '';
+      filteredItems().forEach(({ f, nd }) => {
+        const card = document.createElement('div'); card.className = 'card';
+
+        const top = document.createElement('div'); top.className = 'row';
         const left = document.createElement('div');
-        left.innerHTML = `<div style="font-weight:600">${f.title}</div><div class="subtitle">${f.place||''} · ${f.date||''}</div>`;
-        const right = document.createElement('div');
-        right.innerHTML = `<a class="pill" href="${f.link}" target="_blank" rel="noopener">Website</a>`;
-        top.appendChild(left); top.appendChild(right); card.appendChild(top);
+        const name = f.link ? `<a class="fest-link" href="${f.link}" target="_blank" rel="noopener">${f.title}</a>` : `<span class="fest-link">${f.title}</span>`;
+        left.innerHTML = `${name}<div class="subtitle">${f.place || ''} · ${f.date || ''}</div>`;
+        const right = document.createElement('div'); right.className = 'actions';
+        const btn = document.createElement('button'); btn.className = 'btn'; btn.type = 'button'; btn.textContent = 'Download .ics';
+        btn.addEventListener('click', () => downloadFestivalICS(f));
+        right.appendChild(btn);
+        top.appendChild(left); top.appendChild(right);
+        card.appendChild(top);
 
         if (nd) {
-          const when = nd.atDate.toLocaleString();
-          const row = document.createElement('div'); row.className='row';
-          row.innerHTML = `<div class="deadline">${nd.label}</div><div class="count">${daysLeft(nd.atDate)}</div>`;
+          const row = document.createElement('div'); row.className = 'row';
+          row.innerHTML = `<div style="color:${acid};font-weight:600">${nd.label}</div><div class="count">${daysLeft(nd.atDate)}</div>`;
           card.appendChild(row);
-          const sub = document.createElement('div'); sub.className='subtitle';
-          sub.textContent = `Due: ${when} (${nd.type})`;
+          const sub = document.createElement('div'); sub.className = 'subtitle';
+          sub.textContent = `Due: ${nd.atDate.toLocaleString()} (${nd.type})`;
           card.appendChild(sub);
         } else {
-          const sub = document.createElement('div'); sub.className='subtitle';
-          sub.textContent = 'No upcoming deadlines yet';
-          card.appendChild(sub);
+          const sub = document.createElement('div'); sub.className = 'subtitle';
+          sub.textContent = 'No upcoming deadlines yet'; card.appendChild(sub);
         }
-        list.appendChild(card);
+        grid.appendChild(card);
       });
     }
 
-    // ---- ICS Export ----
-    function icsEscape(s){
-      return (s||'').toString()
-        .replace(/\\/g,'\\\\')
-        .replace(/\n/g,'\\n')
-        .replace(/,/g,'\\,')
-        .replace(/;/g,'\\;');
+    function render() {
+      const isList = QS('#view-list').classList.contains('active');
+      QS('#list-wrap').style.display = isList ? 'block' : 'none';
+      QS('#board-wrap').style.display = isList ? 'none' : 'block';
+      (isList ? renderList : renderBoard)();
     }
-    function dtstamp(d){
-      const pad=n=>String(n).padStart(2,'0');
-      return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())
-            +'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z';
-    }
-    function toICSEvent(f, d){
-      const start = d.atDate;
-      const end = new Date(start.getTime()+60*60*1000); // default 1h window
-      const uid = `${(f.id||f.title)}-${d.type}-${dtstamp(start)}@technodeadlines`;
-      const summary = `${f.title} — ${d.label}`;
-      const loc = f.place||'';
-      const url = f.link||'';
-      const desc = `Type: ${d.type}${url? "\n"+url : ""}`;
-      return [
-        'BEGIN:VEVENT',
-        `UID:${uid}`,
-        `DTSTAMP:${dtstamp(new Date())}`,
-        `DTSTART:${dtstamp(start)}`,
-        `DTEND:${dtstamp(end)}`,
-        `SUMMARY:${icsEscape(summary)}`,
-        `LOCATION:${icsEscape(loc)}`,
-        `DESCRIPTION:${icsEscape(desc)}`,
-        'END:VEVENT'
-      ].join('\n');
-    }
-    function allDeadlines(){
-      const items = [];
-      DATA.forEach(f => {
-        (f.deadlines||[]).forEach(d => {
-          const at = parseAt(d.at);
-          if (at) items.push({ f, d: { ...d, atDate: at } });
-        });
-      });
-      return items.sort((a,b)=>a.d.atDate - b.d.atDate);
-    }
-    function downloadICS(){
-      const events = allDeadlines().map(({f,d}) => toICSEvent(f,d)).join('\n');
-      const ics = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//Techno Deadlines//EN',
-        'CALSCALE:GREGORIAN',
-        events,
-        'END:VCALENDAR'
-      ].join('\n');
-      const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'techno-deadlines.ics';
-      document.body.appendChild(a); a.click(); a.remove();
-    }
-    document.getElementById('dlics').addEventListener('click', downloadICS);
 
-    ['q','type','month','country'].forEach(id => document.getElementById(id).addEventListener('input', render));
+    // --- Wire up ---
+    ['#q', '#type', '#month', '#country'].forEach(s => QS(s).addEventListener('input', render));
+    QS('#dlics').addEventListener('click', downloadICSFiltered);
+
+    QS('#view-list').addEventListener('click', () => {
+      QS('#view-list').classList.add('active'); QS('#view-list').setAttribute('aria-pressed', 'true');
+      QS('#view-board').classList.remove('active'); QS('#view-board').setAttribute('aria-pressed', 'false');
+      render();
+    });
+    QS('#view-board').addEventListener('click', () => {
+      QS('#view-board').classList.add('active'); QS('#view-board').setAttribute('aria-pressed', 'true');
+      QS('#view-list').classList.remove('active'); QS('#view-list').setAttribute('aria-pressed', 'false');
+      render();
+    });
+
+    // initial paint
     render();
   </script>
 </body>
+
 </html>

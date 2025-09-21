@@ -1,0 +1,263 @@
+:root {
+    --fg: #eaeaea;
+    --bg: #0c0c0f;
+    --muted: #9aa0a6;
+    --row: #15151a;
+    --pill: #1f2937;
+    --line: #22222b;
+    --acid: #39ff14;
+}
+
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: Inter, system-ui, Segoe UI, Roboto, sans-serif
+}
+
+/* Links: underlined; acid green on hover */
+a {
+    color: inherit;
+    text-decoration: underline
+}
+
+a:hover {
+    color: var(--acid)
+}
+
+header {
+    max-width: 1100px;
+    margin: 32px auto 8px;
+    padding: 0 16px
+}
+
+.title {
+    font-weight: 800;
+    font-size: clamp(26px, 4vw, 44px);
+    letter-spacing: -.02em
+}
+
+.subtitle {
+    color: var(--muted);
+    margin-top: 8px
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 22px 0
+}
+
+select,
+input,
+button {
+    background: var(--row);
+    color: var(--fg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px
+}
+
+button.pill {
+    background: var(--pill);
+    cursor: pointer;
+    text-decoration: none
+}
+
+.pill {
+    background: var(--pill);
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: #cbd5e1;
+    font-size: 12px;
+    text-decoration: none
+}
+
+footer {
+    max-width: 1100px;
+    margin: 28px auto;
+    padding: 0 16px;
+    color: var(--muted);
+    font-size: 13px
+}
+
+/* List view: transparent table, only acid green separators */
+.table-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px 70px
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: transparent;
+    border: none
+}
+
+thead th {
+    font-weight: 600;
+    text-align: left;
+    font-size: 12px;
+    letter-spacing: .02em;
+    color: #cbd5e1;
+    background: transparent;
+    padding: 10px 6px 8px;
+    border-bottom: 1px solid var(--acid);
+    white-space: nowrap
+}
+
+tbody tr {
+    background: transparent
+}
+
+tbody td {
+    padding: 14px 6px;
+    border-bottom: 1px solid var(--acid);
+    vertical-align: middle;
+    font-size: 14px;
+    line-height: 1.5
+}
+
+tbody tr:last-child td {
+    border-bottom: none
+}
+
+/* Badges & emphasis */
+.badge {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid var(--acid);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    color: var(--acid)
+}
+
+.count {
+    font-weight: 800
+}
+
+.fest-link {
+    font-weight: 700
+}
+
+.muted {
+    color: var(--muted)
+}
+
+/* Mobile */
+@media (max-width:860px) {
+    thead {
+        display: none
+    }
+
+    table,
+    tbody,
+    tr,
+    td {
+        display: block;
+        width: 100%
+    }
+
+    tbody tr {
+        border-top: 1px solid var(--acid)
+    }
+
+    tbody td {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 4px
+    }
+
+    tbody td::before {
+        content: attr(data-label);
+        color: #9aa0a6
+    }
+}
+
+/* View toggle */
+.toggle {
+    display: inline-flex;
+    gap: 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.toggle button {
+    background: var(--row);
+    color: var(--fg);
+    border: 0;
+    padding: 10px 14px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.toggle button.active {
+    background: var(--acid);
+    color: #000;
+}
+
+.toggle button:not(:last-child) {
+    border-right: 1px solid var(--line);
+}
+
+/* Board view cards (used when toggled) */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px
+}
+
+.card {
+    background: transparent;
+    border: 1px solid var(--acid);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center
+}
+
+.card .subtitle {
+    color: var(--muted);
+    margin-top: 4px
+}
+
+.card .actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap
+}
+
+.btn {
+    background: var(--row);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 10px;
+    color: var(--fg);
+    text-decoration: none;
+    cursor: pointer
+}
+
+.btn:hover {
+    color: var(--acid)
+}
