@@ -94,23 +94,38 @@ layout: null
 
     // --- Dates & helpers ---
     function parseAt(s) { return s ? new Date(s.replace(/-/g, '/').replace(' ', 'T') + (s.length <= 10 ? 'T00:00:00' : '')) : null; }
-    function nextDeadline(f) {
-      if (!f.deadlines) return null;
+
+    // NEW: future deadlines list (sorted)
+    function futureDeadlines(f) {
       const now = new Date();
-      const up = f.deadlines.map(d => ({ ...d, atDate: parseAt(d.at) }))
-        .filter(d => d.atDate && d.atDate > now).sort((a, b) => a.atDate - b.atDate);
-      return up[0] || null;
+      return (f.deadlines || [])
+        .map(d => ({ ...d, atDate: parseAt(d.at) }))
+        .filter(d => d.atDate && d.atDate > now)
+        .sort((a, b) => a.atDate - b.atDate);
     }
+
+    function nextDeadline(f) {
+      const fut = futureDeadlines(f);
+      return fut[0] || null;
+    }
+
     function allDeadlinesSorted(f) {
       return (f.deadlines || [])
         .map(d => ({ ...d, atDate: parseAt(d.at) }))
         .filter(d => d.atDate)
         .sort((a, b) => a.atDate - b.atDate);
     }
+
     function daysLeft(t) {
       const ms = t - new Date(); if (ms <= 0) return 'now';
       const d = Math.floor(ms / 86400000), h = Math.floor((ms % 86400000) / 3600000);
       return `${d}d ${h}h`;
+    }
+
+    // NEW: display helper for the chips
+    function formatDeadline(d, tz) {
+      try { return `${d.label} — ${d.atDate.toLocaleString(undefined, tz ? { timeZone: tz } : undefined)}`; }
+      catch { return `${d.label} — ${d.atDate.toLocaleString()}`; }
     }
 
     // --- Filters ---
@@ -126,15 +141,21 @@ layout: null
       [...countries].sort().forEach(c => { const o = document.createElement('option'); o.textContent = c; o.value = c; country.appendChild(o); });
     })();
 
+    // UPDATED: type filter matches ANY future deadline for a festival
     function filteredItems() {
       const q = (QS('#q').value || '').toLowerCase();
       const typ = QS('#type').value;
       const mon = QS('#month').value;
       const ctry = QS('#country').value;
-      return DATA.map(f => ({ f, nd: nextDeadline(f) }))
-        .filter(({ f, nd }) => (
+
+      return DATA.map(f => {
+        const fut = futureDeadlines(f);
+        const nd = fut[0] || null;
+        return { f, nd, fut };
+      })
+        .filter(({ f, nd, fut }) => (
           (!q || (f.title || '').toLowerCase().includes(q) || (f.place || '').toLowerCase().includes(q)) &&
-          (!typ || (nd && nd.type === typ)) &&
+          (!typ || fut.some(d => d.type === typ)) &&
           (!mon || (f.start && new Date(f.start.replace(/-/g, '/')).toLocaleString(undefined, { month: 'long' }) === mon)) &&
           (!ctry || ((/,[\s]*([A-Z]{2})$/.exec(f.place || '') || [])[1] === ctry))
         ))
@@ -147,7 +168,7 @@ layout: null
         });
     }
 
-    // --- ICS helpers ---
+    // --- ICS helpers (unchanged) ---
     function icsEscape(s) { return (s || '').toString().replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/,/g, '\\,').replace(/;/g, '\\;'); }
     function dtstamp(d) { const p = n => String(n).padStart(2, '0'); return d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + 'T' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + p(d.getUTCSeconds()) + 'Z'; }
     function eventICS(f, d) {
@@ -177,9 +198,10 @@ layout: null
     }
 
     // --- Renderers ---
+    // LIST view now shows ALL upcoming deadlines in a second row
     function renderList() {
       const tbody = QS('#list'); tbody.innerHTML = '';
-      filteredItems().forEach(({ f, nd }) => {
+      filteredItems().forEach(({ f, nd, fut }) => {
         const tr = document.createElement('tr');
 
         const tdFest = document.createElement('td'); tdFest.setAttribute('data-label', 'Festival');
@@ -207,12 +229,24 @@ layout: null
         tdICS.appendChild(btn); tr.appendChild(tdICS);
 
         tbody.appendChild(tr);
+
+        // NEW: row under each festival with ALL upcoming deadlines
+        if (fut.length) {
+          const tr2 = document.createElement('tr');
+          const tdAll = document.createElement('td');
+          tdAll.colSpan = 7; // full width under the header columns
+          tdAll.className = 'all-deadlines';
+          tdAll.innerHTML = 'All upcoming: ' + fut.map(d => `<span class="chip">${formatDeadline(d, f.timezone)}</span>`).join(' ');
+          tr2.appendChild(tdAll);
+          tbody.appendChild(tr2);
+        }
       });
     }
 
+    // BOARD view shows the same set of upcoming deadlines as chips
     function renderBoard() {
       const grid = QS('#grid'); grid.innerHTML = '';
-      filteredItems().forEach(({ f, nd }) => {
+      filteredItems().forEach(({ f, nd, fut }) => {
         const card = document.createElement('div'); card.className = 'card';
 
         const top = document.createElement('div'); top.className = 'row';
@@ -237,6 +271,13 @@ layout: null
           const sub = document.createElement('div'); sub.className = 'subtitle';
           sub.textContent = 'No upcoming deadlines yet'; card.appendChild(sub);
         }
+
+        if (fut.length) {
+          const wrap = document.createElement('div'); wrap.className = 'chips';
+          wrap.innerHTML = fut.map(d => `<span class="chip">${formatDeadline(d, f.timezone)}</span>`).join(' ');
+          card.appendChild(wrap);
+        }
+
         grid.appendChild(card);
       });
     }
