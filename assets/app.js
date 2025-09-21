@@ -59,11 +59,39 @@
         [...countries].sort().forEach(c => { const o = document.createElement('option'); o.textContent = c; o.value = c; country.appendChild(o); });
     }
 
+    // Sort functions
+    function sortByDeadline(a, b) {
+        if (a.nd && b.nd) return a.nd.atDate - b.nd.atDate;
+        if (a.nd && !b.nd) return -1; if (!a.nd && b.nd) return 1;
+        const as = a.f.start ? new Date(a.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
+        const bs = b.f.start ? new Date(b.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
+        return as - bs;
+    }
+
+    function sortByStart(a, b) {
+        const as = a.f.start ? new Date(a.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
+        const bs = b.f.start ? new Date(b.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
+        return as - bs;
+    }
+
+    function sortByLocation(a, b) {
+        const aLoc = (a.f.place || '').toLowerCase();
+        const bLoc = (b.f.place || '').toLowerCase();
+        return aLoc.localeCompare(bLoc);
+    }
+
     function filteredItems() {
         const q = (QS('#q').value || '').toLowerCase();
         const typ = QS('#type').value;
         const mon = QS('#month').value;
         const ctry = QS('#country').value;
+        const sortBy = QS('#sort').value || 'deadline';
+
+        const sortFunctions = {
+            deadline: sortByDeadline,
+            start: sortByStart,
+            location: sortByLocation
+        };
 
         return DATA.map(f => {
             const fut = futureDeadlines(f);
@@ -76,13 +104,7 @@
                 (!mon || (f.start && new Date(f.start.replace(/-/g, '/')).toLocaleString(undefined, { month: 'long' }) === mon)) &&
                 (!ctry || ((/,[\s]*([A-Z]{2})$/.exec(f.place || '') || [])[1] === ctry))
             ))
-            .sort((a, b) => {
-                if (a.nd && b.nd) return a.nd.atDate - b.nd.atDate;
-                if (a.nd && !b.nd) return -1; if (!a.nd && b.nd) return 1;
-                const as = a.f.start ? new Date(a.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
-                const bs = b.f.start ? new Date(b.f.start.replace(/-/g, '/')) : new Date(8640000000000000);
-                return as - bs;
-            });
+            .sort(sortFunctions[sortBy] || sortByDeadline);
     }
 
     function renderList() {
@@ -177,7 +199,7 @@
 
     // wire up after data fetch
     function wireUp() {
-        ['#q', '#type', '#month', '#country'].forEach(s => QS(s).addEventListener('input', render));
+        ['#q', '#type', '#month', '#country', '#sort'].forEach(s => QS(s).addEventListener('input', render));
         QS('#dlics')?.addEventListener('click', () => {
             const items = filteredItems();
             const all = []; items.forEach(({ f }) => allDeadlinesSorted(f).forEach(d => all.push(eventICS(f, d))));
