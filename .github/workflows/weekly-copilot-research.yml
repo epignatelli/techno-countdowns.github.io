@@ -49,5 +49,5 @@ jobs:
         uses: peter-evans/create-issue-from-file@v5
         with:
           title: ${{ steps.mk.outputs.title }}
-          content-file: .github/copilot-prompts/weekly-research.md
+          content-filepath: .github/copilot-prompts/weekly-research.md
           labels: "research, copilot, automation"
