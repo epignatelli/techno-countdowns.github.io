@@ -26,7 +26,7 @@ except Exception:
             return False
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(?:\s\d{2}:\d{2})?$")
-REQ_TOP = {"title","year","id","link","timezone"}
+REQ_TOP = {"title","year","id","link","timezone","genre"}
 REQ_DL  = {"type","label","at"}
 
 errs = []
@@ -55,6 +55,18 @@ for i, f in enumerate(data or []):
     tz = f.get("timezone")
     if not tz or not is_tz(tz):
         errs.append(f"{ctx}: invalid timezone '{tz}'")
+    # Validate genre field
+    genre = f.get("genre")
+    if not genre:
+        errs.append(f"{ctx}: 'genre' is required")
+    elif not isinstance(genre, list):
+        errs.append(f"{ctx}: 'genre' must be a list of strings")
+    elif not genre:  # empty list
+        errs.append(f"{ctx}: 'genre' cannot be empty")
+    else:
+        for idx, g in enumerate(genre):
+            if not isinstance(g, str) or not g.strip():
+                errs.append(f"{ctx}: 'genre[{idx}]' must be a non-empty string")
     for k in ("start","end"):
         if f.get(k) and not DATE_RE.fullmatch(f[k]):
             errs.append(f"{ctx}: '{k}' must be 'YYYY-MM-DD'")

@@ -49,14 +49,16 @@
 
     // --- Filters/rendering wired after data loads ---
     function initFilters() {
-        const month = QS('#month'), country = QS('#country');
-        const months = new Set(), countries = new Set();
+        const month = QS('#month'), country = QS('#country'), genre = QS('#genre');
+        const months = new Set(), countries = new Set(), genres = new Set();
         DATA.forEach(f => {
             if (f.start) months.add(new Date(f.start.replace(/-/g, '/')).toLocaleString(undefined, { month: 'long' }));
             const m = /,\s*([A-Z]{2})$/.exec(f.place || ''); if (m) countries.add(m[1]);
+            if (f.genre && Array.isArray(f.genre)) f.genre.forEach(g => genres.add(g));
         });
         [...months].sort((a, b) => new Date(`${a} 1, 2000`) - new Date(`${b} 1, 2000`)).forEach(m => { const o = document.createElement('option'); o.textContent = m; o.value = m; month.appendChild(o); });
         [...countries].sort().forEach(c => { const o = document.createElement('option'); o.textContent = c; o.value = c; country.appendChild(o); });
+        [...genres].sort().forEach(g => { const o = document.createElement('option'); o.textContent = g; o.value = g; genre.appendChild(o); });
     }
 
     function filteredItems() {
@@ -64,6 +66,7 @@
         const typ = QS('#type').value;
         const mon = QS('#month').value;
         const ctry = QS('#country').value;
+        const gnr = QS('#genre').value;
 
         return DATA.map(f => {
             const fut = futureDeadlines(f);
@@ -74,7 +77,8 @@
                 (!q || (f.title || '').toLowerCase().includes(q) || (f.place || '').toLowerCase().includes(q)) &&
                 (!typ || fut.some(d => d.type === typ)) &&
                 (!mon || (f.start && new Date(f.start.replace(/-/g, '/')).toLocaleString(undefined, { month: 'long' }) === mon)) &&
-                (!ctry || ((/,[\s]*([A-Z]{2})$/.exec(f.place || '') || [])[1] === ctry))
+                (!ctry || ((/,[\s]*([A-Z]{2})$/.exec(f.place || '') || [])[1] === ctry)) &&
+                (!gnr || (f.genre && Array.isArray(f.genre) && f.genre.includes(gnr)))
             ))
             .sort((a, b) => {
                 if (a.nd && b.nd) return a.nd.atDate - b.nd.atDate;
@@ -94,6 +98,10 @@
             const tdFest = document.createElement('td'); tdFest.setAttribute('data-label', 'Festival');
             const name = f.link ? `<a class="fest-link" href="${f.link}" target="_blank" rel="noopener">${f.title}</a>` : `<span class="fest-link">${f.title}</span>`;
             tdFest.innerHTML = name; tr.appendChild(tdFest);
+
+            const tdGenre = document.createElement('td'); tdGenre.setAttribute('data-label', 'Genre');
+            const genreList = f.genre && Array.isArray(f.genre) ? f.genre.join(', ') : '—';
+            tdGenre.innerHTML = `<span>${genreList}</span>`; tr.appendChild(tdGenre);
 
             const tdPlace = document.createElement('td'); tdPlace.setAttribute('data-label', 'Place');
             tdPlace.innerHTML = f.place ? `<span>${f.place}</span>` : '<span class="muted">—</span>'; tr.appendChild(tdPlace);
@@ -177,7 +185,7 @@
 
     // wire up after data fetch
     function wireUp() {
-        ['#q', '#type', '#month', '#country'].forEach(s => QS(s).addEventListener('input', render));
+        ['#q', '#type', '#month', '#country', '#genre'].forEach(s => QS(s).addEventListener('input', render));
         QS('#dlics')?.addEventListener('click', () => {
             const items = filteredItems();
             const all = []; items.forEach(({ f }) => allDeadlinesSorted(f).forEach(d => all.push(eventICS(f, d))));
@@ -230,7 +238,7 @@
                 const tbody = document.querySelector('#list');
                 if (tbody) {
                     tbody.innerHTML =
-                        '<tr><td colspan="7">Failed to load festival data. Check the browser console for details.</td></tr>';
+                        '<tr><td colspan="8">Failed to load festival data. Check the browser console for details.</td></tr>';
                 }
             });
     })();

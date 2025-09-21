@@ -19,7 +19,7 @@ Edit [`_data/festivals.yml`](./_data/festivals.yml) and add an entry with this s
   date: "July 4–6, 2026"          # pretty range for display
   start: "2026-07-04"            # ISO date (optional but recommended)
   end:   "2026-07-06"            # ISO date (optional but recommended)
-  genres: ["techno", "hard techno"] # optional tags
+  genre: ["techno", "hard techno"] # MANDATORY: list of genre strings
   note: "Subject to permits/weather" # optional
   # One festival → many deadlines. Client will pick the next upcoming.
   deadlines:
@@ -60,7 +60,8 @@ bundle exec jekyll serve
 
 ## Validation on PRs
 All changes to `_data/festivals.yml` are automatically validated:
-- required keys present (`title`, `year`, `id`, `link`, `timezone`)
+- required keys present (`title`, `year`, `id`, `link`, `timezone`, `genre`)
+- `genre` must be a non-empty list of strings
 - unique `id` slugs
 - valid date/time formats and IANA timezones
 

@@ -8,7 +8,7 @@
   date: "July 4–6, 2026"
   start: "2026-07-04"
   end:   "2026-07-06"
-  genres: ["techno", "hard techno"]
+  genre: ["techno", "hard techno"]
   deadlines:
     - type: presale_signup
       label: "Presale registration closes"
@@ -30,6 +30,7 @@
   date: "April 4, 2026"
   start: "2026-04-04"
   end:   "2026-04-04"
+  genre: ["techno", "minimal"]
   deadlines:
     - type: lineup_drop
       label: "Line‑up drop"
@@ -48,6 +49,7 @@
   date: "July 10–12, 2026"
   start: "2026-07-10"
   end:   "2026-07-12"
+  genre: ["techno", "house"]
   deadlines:
     - type: presale_signup
       label: "Presale sign‑up closes"
@@ -69,6 +71,7 @@
   date: "Aug 5–9, 2026"
   start: "2026-08-05"
   end:   "2026-08-09"
+  genre: ["house", "techno", "electronic"]
   deadlines:
     - type: general_sale
       label: "General sale"
@@ -84,6 +87,7 @@
   date: "Aug 16–20, 2026"
   start: "2026-08-16"
   end:   "2026-08-20"
+  genre: ["techno", "minimal"]
   deadlines:
     - type: travel_package
       label: "Travel packages on sale"
