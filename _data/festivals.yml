@@ -1,90 +1,284 @@
-- title: "Awakenings"
-  year: 2026
-  id: awakenings-2026
-  full_name: "Awakenings Summer Festival"
-  link: "https://awakenings.com/"
-  timezone: "Europe/Amsterdam"
-  place: "Hilvarenbeek, NL"
-  date: "July 4–6, 2026"
-  start: "2026-07-04"
-  end:   "2026-07-06"
-  genres: ["techno", "hard techno"]
-  deadlines:
-    - type: presale_signup
-      label: "Presale registration closes"
-      at: "2026-01-15 18:00"
-    - type: presale
-      label: "Presale starts"
-      at: "2026-01-17 10:00"
-    - type: general_sale
-      label: "General sale"
-      at: "2026-01-20 10:00"
-
-- title: "Time Warp Mannheim"
-  year: 2026
-  id: time-warp-mannheim-2026
-  full_name: "Time Warp Mannheim"
-  link: "https://www.time-warp.de/"
-  timezone: "Europe/Berlin"
-  place: "Mannheim, DE"
-  date: "April 4, 2026"
-  start: "2026-04-04"
-  end:   "2026-04-04"
-  deadlines:
-    - type: lineup_drop
-      label: "Line‑up drop"
-      at: "2026-01-10 12:00"
-    - type: general_sale
-      label: "General sale"
-      at: "2026-01-17 12:00"
-
-- title: "Kappa FuturFestival"
-  year: 2026
-  id: kappa-futur-2026
-  full_name: "Kappa FuturFestival"
-  link: "https://kappafuturfestival.it/"
-  timezone: "Europe/Rome"
-  place: "Turin, IT"
-  date: "July 10–12, 2026"
-  start: "2026-07-10"
-  end:   "2026-07-12"
-  deadlines:
-    - type: presale_signup
-      label: "Presale sign‑up closes"
-      at: "2026-02-01 18:00"
-    - type: presale
-      label: "Presale starts"
-      at: "2026-02-03 10:00"
-    - type: tier1_ends
-      label: "Tier 1 ends"
-      at: "2026-02-10 23:59"
-
-- title: "Dekmantel"
-  year: 2026
-  id: dekmantel-2026
-  full_name: "Dekmantel Festival"
-  link: "https://www.dekmantel.com/"
-  timezone: "Europe/Amsterdam"
-  place: "Amsterdam, NL"
-  date: "Aug 5–9, 2026"
-  start: "2026-08-05"
-  end:   "2026-08-09"
-  deadlines:
-    - type: general_sale
-      label: "General sale"
-      at: "2026-02-08 12:00"
+# EU Techno Festivals 2025 - Sorted by next upcoming deadline
 
 - title: "Sonus"
-  year: 2026
-  id: sonus-2026
+  year: 2025
+  id: sonus-2025
   full_name: "Sonus Festival"
   link: "https://www.sonus-festival.com/"
   timezone: "Europe/Zagreb"
   place: "Pag Island, HR"
-  date: "Aug 16–20, 2026"
-  start: "2026-08-16"
-  end:   "2026-08-20"
+  date: "Aug 18–22, 2025"
+  start: "2025-08-18"
+  end: "2025-08-22"
   deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-15 12:00"
     - type: travel_package
-      label: "Travel packages on sale"
-      at: "2025-12-01 12:00"
+      label: "Travel packages available"
+      at: "2025-02-01 12:00"
+    - type: camping_booking
+      label: "Camping booking opens"
+      at: "2025-03-01 12:00"
+
+- title: "Awakenings"
+  year: 2025
+  id: awakenings-2025
+  full_name: "Awakenings Summer Festival"
+  link: "https://awakenings.com/"
+  timezone: "Europe/Amsterdam"
+  place: "Hilvarenbeek, NL"
+  date: "June 28–29, 2025"
+  start: "2025-06-28"
+  end: "2025-06-29"
+  genres: ["techno", "hard techno"]
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-17 10:00"
+    - type: tier1_ends
+      label: "Early bird tier ends"
+      at: "2025-02-28 23:59"
+    - type: camping_booking
+      label: "Camping booking opens"
+      at: "2025-03-15 12:00"
+
+- title: "Terminal V"
+  year: 2025
+  id: terminal-v-2025
+  full_name: "Terminal V"
+  link: "https://www.terminalv.co.uk/"
+  timezone: "Europe/London"
+  place: "Edinburgh, GB"
+  date: "April 5, 2025"
+  start: "2025-04-05"
+  end: "2025-04-05"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-18 12:00"
+    - type: tier1_ends
+      label: "Early bird ends"
+      at: "2025-02-15 23:59"
+
+- title: "Time Warp Mannheim"
+  year: 2025
+  id: time-warp-mannheim-2025
+  full_name: "Time Warp Mannheim"
+  link: "https://www.time-warp.de/"
+  timezone: "Europe/Berlin"
+  place: "Mannheim, DE"
+  date: "April 5, 2025"
+  start: "2025-04-05"
+  end: "2025-04-05"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-20 12:00"
+    - type: tier2_ends
+      label: "Second tier ends"
+      at: "2025-02-15 23:59"
+
+- title: "Neopop"
+  year: 2025
+  id: neopop-2025
+  full_name: "Neopop Electronic Music Festival"
+  link: "https://neopop.com.pt/"
+  timezone: "Europe/Lisbon"
+  place: "Viana do Castelo, PT"
+  date: "Aug 7–9, 2025"
+  start: "2025-08-07"
+  end: "2025-08-09"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-20 12:00"
+    - type: tier1_ends
+      label: "Early bird ends"
+      at: "2025-03-01 23:59"
+
+- title: "Melt Festival"
+  year: 2025
+  id: melt-2025
+  full_name: "Melt Festival"
+  link: "https://www.meltfestival.de/"
+  timezone: "Europe/Berlin"
+  place: "Gräfenhainichen, DE"
+  date: "July 18–20, 2025"
+  start: "2025-07-18"
+  end: "2025-07-20"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-22 12:00"
+    - type: tier1_ends
+      label: "Early bird ends"
+      at: "2025-02-28 23:59"
+
+- title: "DGTL Amsterdam"
+  year: 2025
+  id: dgtl-amsterdam-2025
+  full_name: "DGTL Amsterdam"
+  link: "https://dgtl.nl/"
+  timezone: "Europe/Amsterdam"
+  place: "Amsterdam, NL"
+  date: "April 12–13, 2025"
+  start: "2025-04-12"
+  end: "2025-04-13"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-25 12:00"
+    - type: tier2_ends
+      label: "Second tier ends"
+      at: "2025-02-28 23:59"
+
+- title: "Caprices"
+  year: 2025
+  id: caprices-2025
+  full_name: "Caprices Festival"
+  link: "https://www.caprices.ch/"
+  timezone: "Europe/Zurich"
+  place: "Crans-Montana, CH"
+  date: "April 11–13, 2025"
+  start: "2025-04-11"
+  end: "2025-04-13"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-25 12:00"
+    - type: tier2_ends
+      label: "Second tier ends"
+      at: "2025-02-20 23:59"
+
+- title: "Dimensions"
+  year: 2025
+  id: dimensions-2025
+  full_name: "Dimensions Festival"
+  link: "https://www.dimensionsfestival.com/"
+  timezone: "Europe/Zagreb"
+  place: "Pula, HR"
+  date: "Aug 28 – Sep 1, 2025"
+  start: "2025-08-28"
+  end: "2025-09-01"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-28 12:00"
+    - type: travel_package
+      label: "Travel packages available"
+      at: "2025-02-15 12:00"
+    - type: camping_booking
+      label: "Camping booking opens"
+      at: "2025-03-01 12:00"
+
+- title: "Junction 2"
+  year: 2025
+  id: junction-2-2025
+  full_name: "Junction 2 Festival"
+  link: "https://junction2.london/"
+  timezone: "Europe/London"
+  place: "London, GB"
+  date: "June 7–8, 2025"
+  start: "2025-06-07"
+  end: "2025-06-08"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-01-30 12:00"
+    - type: tier2_ends
+      label: "Second tier ends"
+      at: "2025-03-01 23:59"
+
+- title: "Kappa FuturFestival"
+  year: 2025
+  id: kappa-futur-2025
+  full_name: "Kappa FuturFestival"
+  link: "https://kappafuturfestival.it/"
+  timezone: "Europe/Rome"
+  place: "Turin, IT"
+  date: "July 5–6, 2025"
+  start: "2025-07-05"
+  end: "2025-07-06"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-02-01 10:00"
+    - type: tier1_ends
+      label: "Tier 1 ends"
+      at: "2025-03-01 23:59"
+    - type: camping_booking
+      label: "Camping opens"
+      at: "2025-03-15 12:00"
+
+- title: "Loveland"
+  year: 2025
+  id: loveland-2025
+  full_name: "Loveland Festival"
+  link: "https://lovelandfestival.com/"
+  timezone: "Europe/Amsterdam"
+  place: "Spaarnwoude, NL"
+  date: "Aug 9, 2025"
+  start: "2025-08-09"
+  end: "2025-08-09"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-02-01 12:00"
+    - type: tier1_ends
+      label: "Early bird ends"
+      at: "2025-03-15 23:59"
+
+- title: "Nature One"
+  year: 2025
+  id: nature-one-2025
+  full_name: "Nature One"
+  link: "https://www.nature-one.de/"
+  timezone: "Europe/Berlin"
+  place: "Kastellaun, DE"
+  date: "Aug 1–3, 2025"
+  start: "2025-08-01"
+  end: "2025-08-03"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-02-01 10:00"
+    - type: camping_booking
+      label: "Camping booking opens"
+      at: "2025-03-01 12:00"
+
+- title: "Monegros"
+  year: 2025
+  id: monegros-2025
+  full_name: "Monegros Desert Festival"
+  link: "https://www.monegros.com/"
+  timezone: "Europe/Madrid"
+  place: "Fraga, ES"
+  date: "July 26, 2025"
+  start: "2025-07-26"
+  end: "2025-07-26"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-02-01 12:00"
+    - type: tier1_ends
+      label: "Early bird ends"
+      at: "2025-03-15 23:59"
+
+- title: "Dekmantel"
+  year: 2025
+  id: dekmantel-2025
+  full_name: "Dekmantel Festival"
+  link: "https://www.dekmantel.com/"
+  timezone: "Europe/Amsterdam"
+  place: "Amsterdam, NL"
+  date: "July 31 – Aug 3, 2025"
+  start: "2025-07-31"
+  end: "2025-08-03"
+  deadlines:
+    - type: general_sale
+      label: "General sale continues"
+      at: "2025-02-08 12:00"
+    - type: tier1_ends
+      label: "Early bird ends"
+      at: "2025-03-15 23:59"
