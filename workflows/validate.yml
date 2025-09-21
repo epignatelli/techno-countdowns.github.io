@@ -1,0 +1,27 @@
+name: Validate data
+on:
+  pull_request:
+    paths:
+      - '_data/**'
+      - 'scripts/validate_festivals.py'
+  push:
+    branches: [ main ]
+    paths:
+      - '_data/**'
+      - 'scripts/validate_festivals.py'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install PyYAML pytz
+      - name: Validate YAML
+        run: |
+          python scripts/validate_festivals.py
