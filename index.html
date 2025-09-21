@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ site.title }}</title>
+  <meta name="description" content="{{ site.description }}">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --fg:#eaeaea; --bg:#0c0c0f; --muted:#9aa0a6; --card:#15151a; --pill:#1f2937; --accent:#7c3aed; }
+    *{box-sizing:border-box} html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Segoe UI,Roboto,sans-serif}
+    a{color:var(--fg);text-decoration:none} a:hover{opacity:.88}
+    header{max-width:1100px;margin:32px auto 8px;padding:0 16px}
+    .title{font-weight:800;font-size:clamp(24px,4vw,44px);letter-spacing:-.02em}
+    .subtitle{color:var(--muted);margin-top:6px}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+    select,input,button{background:var(--card);color:var(--fg);border:1px solid #2a2a33;border-radius:10px;padding:10px 12px}
+    button.pill{background:var(--pill); cursor:pointer;}
+    main{max-width:1100px;margin:0 auto;padding:12px 16px 60px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+    .card{background:var(--card);border:1px solid #202028;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+    .row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+    .pill{background:var(--pill);padding:4px 10px;border-radius:999px;color:#cbd5e1;font-size:12px}
+    .count{font-weight:800;font-size:28px}
+    .deadline{color:#c7a6ff}
+    footer{max-width:1100px;margin:22px auto;padding:0 16px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">Techno Deadlines</div>
+    <div class="subtitle">Countdowns for presales, ticket tiers, camping & shuttle bookings, refund cutoffs, and more.</div>
+    <div class="controls">
+      <input id="q" placeholder="Search festival or city…" />
+      <select id="type">
+        <option value="">All deadline types</option>
+        <option>presale_signup</option>
+        <option>presale</option>
+        <option>general_sale</option>
+        <option>tier1_ends</option>
+        <option>tier2_ends</option>
+        <option>payment_plan</option>
+        <option>camping_booking</option>
+        <option>shuttle_booking</option>
+        <option>refund_transfer</option>
+        <option>travel_package</option>
+        <option>lineup_drop</option>
+        <option>other</option>
+      </select>
+      <select id="month">
+        <option value="">Any month</option>
+      </select>
+      <select id="country">
+        <option value="">Any country</option>
+      </select>
+      <button id="dlics" class="pill">Download .ics (all deadlines)</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="list" class="grid"></div>
+  </main>
+
+  <footer>
+    Inspired by <a href="https://aideadlin.es/">ai-deadlines</a>. Data is community‑maintained — verify details on the official festival websites.
+  </footer>
+
+  <script>
+    const DATA = {{ site.data.festivals | jsonify }};
+
+    // Helper: parse ISO or "YYYY-MM-DD HH:MM" (display in local TZ)
+    function parseAt(s) { return s ? new Date(s.replace(/-/g,'/').replace(' ', 'T')+ (s.length<=10? 'T00:00:00':'') ) : null; }
+
+    function nextDeadline(f) {
+      if (!f.deadlines) return null;
+      const now = new Date();
+      const upcoming = f.deadlines
+        .map(d => ({...d, atDate: parseAt(d.at)}))
+        .filter(d => d.atDate && d.atDate > now)
+        .sort((a,b) => a.atDate - b.atDate);
+      return upcoming[0] || null;
+    }
+
+    function daysLeft(target) {
+      const ms = target - new Date();
+      if (ms <= 0) return 'now';
+      const d = Math.floor(ms/86400000), h = Math.floor((ms%86400000)/3600000);
+      return `${d}d ${h}h`;
+    }
+
+    // Populate month & country filters
+    (function initFilters(){
+      const month = document.getElementById('month');
+      const country = document.getElementById('country');
+      const months = new Set();
+      const countries = new Set();
+      DATA.forEach(f => {
+        if (f.start) { months.add(new Date(f.start.replace(/-/g,'/')).toLocaleString(undefined,{month:'long'})); }
+        const m = /,\s*([A-Z]{2})$/.exec(f.place||'');
+        if (m) countries.add(m[1]);
+      });
+      [...months].sort((a,b)=>new Date(`${a} 1, 2000`) - new Date(`${b} 1, 2000`)).forEach(m=>{ const o=document.createElement('option'); o.textContent=m; o.value=m; month.appendChild(o); });
+      [...countries].sort().forEach(c=>{ const o=document.createElement('option'); o.textContent=c; o.value=c; country.appendChild(o); });
+    })();
+
+    function render() {
+      const q = document.getElementById('q').value.toLowerCase();
+      const typ = document.getElementById('type').value;
+      const mon = document.getElementById('month').value;
+      const ctry = document.getElementById('country').value;
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+
+      const items = DATA.map(f => ({ f, nd: nextDeadline(f) }))
+        .filter(({f, nd}) => (
+          (!q || (f.title||'').toLowerCase().includes(q) || (f.place||'').toLowerCase().includes(q)) &&
+          (!typ || (nd && nd.type===typ)) &&
+          (!mon || (f.start && new Date(f.start.replace(/-/g,'/')).toLocaleString(undefined,{month:'long'})===mon)) &&
+          (!ctry || ((/,[\s]*([A-Z]{2})$/.exec(f.place||'')||[])[1]===ctry))
+        ))
+        .sort((a,b) => {
+          // sort by next deadline, then start date
+          if (a.nd && b.nd) return a.nd.atDate - b.nd.atDate;
+          if (a.nd && !b.nd) return -1; if (!a.nd && b.nd) return 1;
+          const as = a.f.start ? new Date(a.f.start.replace(/-/g,'/')) : new Date(8640000000000000);
+          const bs = b.f.start ? new Date(b.f.start.replace(/-/g,'/')) : new Date(8640000000000000);
+          return as - bs;
+        });
+
+      items.forEach(({f, nd}) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        const top = document.createElement('div'); top.className='row';
+        const left = document.createElement('div');
+        left.innerHTML = `<div style="font-weight:600">${f.title}</div><div class="subtitle">${f.place||''} · ${f.date||''}</div>`;
+        const right = document.createElement('div');
+        right.innerHTML = `<a class="pill" href="${f.link}" target="_blank" rel="noopener">Website</a>`;
+        top.appendChild(left); top.appendChild(right); card.appendChild(top);
+
+        if (nd) {
+          const when = nd.atDate.toLocaleString();
+          const row = document.createElement('div'); row.className='row';
+          row.innerHTML = `<div class="deadline">${nd.label}</div><div class="count">${daysLeft(nd.atDate)}</div>`;
+          card.appendChild(row);
+          const sub = document.createElement('div'); sub.className='subtitle';
+          sub.textContent = `Due: ${when} (${nd.type})`;
+          card.appendChild(sub);
+        } else {
+          const sub = document.createElement('div'); sub.className='subtitle';
+          sub.textContent = 'No upcoming deadlines yet';
+          card.appendChild(sub);
+        }
+        list.appendChild(card);
+      });
+    }
+
+    // ---- ICS Export ----
+    function icsEscape(s){
+      return (s||'').toString()
+        .replace(/\\/g,'\\\\')
+        .replace(/\n/g,'\\n')
+        .replace(/,/g,'\\,')
+        .replace(/;/g,'\\;');
+    }
+    function dtstamp(d){
+      const pad=n=>String(n).padStart(2,'0');
+      return d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())
+            +'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z';
+    }
+    function toICSEvent(f, d){
+      const start = d.atDate;
+      const end = new Date(start.getTime()+60*60*1000); // default 1h window
+      const uid = `${(f.id||f.title)}-${d.type}-${dtstamp(start)}@technodeadlines`;
+      const summary = `${f.title} — ${d.label}`;
+      const loc = f.place||'';
+      const url = f.link||'';
+      const desc = `Type: ${d.type}${url? "\n"+url : ""}`;
+      return [
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTAMP:${dtstamp(new Date())}`,
+        `DTSTART:${dtstamp(start)}`,
+        `DTEND:${dtstamp(end)}`,
+        `SUMMARY:${icsEscape(summary)}`,
+        `LOCATION:${icsEscape(loc)}`,
+        `DESCRIPTION:${icsEscape(desc)}`,
+        'END:VEVENT'
+      ].join('\n');
+    }
+    function allDeadlines(){
+      const items = [];
+      DATA.forEach(f => {
+        (f.deadlines||[]).forEach(d => {
+          const at = parseAt(d.at);
+          if (at) items.push({ f, d: { ...d, atDate: at } });
+        });
+      });
+      return items.sort((a,b)=>a.d.atDate - b.d.atDate);
+    }
+    function downloadICS(){
+      const events = allDeadlines().map(({f,d}) => toICSEvent(f,d)).join('\n');
+      const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Techno Deadlines//EN',
+        'CALSCALE:GREGORIAN',
+        events,
+        'END:VCALENDAR'
+      ].join('\n');
+      const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'techno-deadlines.ics';
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+    document.getElementById('dlics').addEventListener('click', downloadICS);
+
+    ['q','type','month','country'].forEach(id => document.getElementById(id).addEventListener('input', render));
+    render();
+  </script>
+</body>
+</html>

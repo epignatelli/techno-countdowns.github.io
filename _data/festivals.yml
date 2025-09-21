@@ -1,0 +1,90 @@
+- title: "Awakenings"
+  year: 2026
+  id: awakenings-2026
+  full_name: "Awakenings Summer Festival"
+  link: "https://awakenings.com/"
+  timezone: "Europe/Amsterdam"
+  place: "Hilvarenbeek, NL"
+  date: "July 4–6, 2026"
+  start: "2026-07-04"
+  end:   "2026-07-06"
+  genres: ["techno", "hard techno"]
+  deadlines:
+    - type: presale_signup
+      label: "Presale registration closes"
+      at: "2026-01-15 18:00"
+    - type: presale
+      label: "Presale starts"
+      at: "2026-01-17 10:00"
+    - type: general_sale
+      label: "General sale"
+      at: "2026-01-20 10:00"
+
+- title: "Time Warp Mannheim"
+  year: 2026
+  id: time-warp-mannheim-2026
+  full_name: "Time Warp Mannheim"
+  link: "https://www.time-warp.de/"
+  timezone: "Europe/Berlin"
+  place: "Mannheim, DE"
+  date: "April 4, 2026"
+  start: "2026-04-04"
+  end:   "2026-04-04"
+  deadlines:
+    - type: lineup_drop
+      label: "Line‑up drop"
+      at: "2026-01-10 12:00"
+    - type: general_sale
+      label: "General sale"
+      at: "2026-01-17 12:00"
+
+- title: "Kappa FuturFestival"
+  year: 2026
+  id: kappa-futur-2026
+  full_name: "Kappa FuturFestival"
+  link: "https://kappafuturfestival.it/"
+  timezone: "Europe/Rome"
+  place: "Turin, IT"
+  date: "July 10–12, 2026"
+  start: "2026-07-10"
+  end:   "2026-07-12"
+  deadlines:
+    - type: presale_signup
+      label: "Presale sign‑up closes"
+      at: "2026-02-01 18:00"
+    - type: presale
+      label: "Presale starts"
+      at: "2026-02-03 10:00"
+    - type: tier1_ends
+      label: "Tier 1 ends"
+      at: "2026-02-10 23:59"
+
+- title: "Dekmantel"
+  year: 2026
+  id: dekmantel-2026
+  full_name: "Dekmantel Festival"
+  link: "https://www.dekmantel.com/"
+  timezone: "Europe/Amsterdam"
+  place: "Amsterdam, NL"
+  date: "Aug 5–9, 2026"
+  start: "2026-08-05"
+  end:   "2026-08-09"
+  deadlines:
+    - type: general_sale
+      label: "General sale"
+      at: "2026-02-08 12:00"
+
+- title: "Sonus"
+  year: 2026
+  id: sonus-2026
+  full_name: "Sonus Festival"
+  link: "https://www.sonus-festival.com/"
+  timezone: "Europe/Zagreb"
+  place: "Pag Island, HR"
+  date: "Aug 16–20, 2026"
+  start: "2026-08-16"
+  end:   "2026-08-20"
+  deadlines:
+    - type: travel_package
+      label: "Travel packages on sale"
+      at: "2025-12-01 12:00"

@@ -1,0 +1,10 @@
+title: "Techno Deadlines"
+description: "Countdowns for techno festival ticket & logistics deadlines"
+url: ""   # set your custom domain later (e.g., https://technodeadlin.es)
+baseurl: ""
+markdown: kramdown
+plugins: []  # keep empty for GitHub Pages default safelist
+timezone: Europe/London
+
+# Expose data to templates
+collections: {}
