@@ -1,0 +1,48 @@
+name: Weekly Copilot Research (Issue)
+
+on:
+  schedule:
+    # GitHub cron is UTC; fire at both 06:00 and 07:00 UTC to straddle DST.
+    - cron: "0 6 * * 1"
+    - cron: "0 7 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  create-issue:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Gate so we only run at 07:00 Europe/London (handles DST cleanly)
+      - name: Ensure it's 07:00 in Europe/London
+        id: gate
+        run: |
+          export TZ=Europe/London
+          HOUR="$(date +%H)"
+          echo "Current London hour: $HOUR"
+          if [ "$HOUR" != "07" ]; then
+            echo "run=false" >> $GITHUB_OUTPUT
+          else
+            echo "run=true" >> $GITHUB_OUTPUT
+          fi
+
+      # Build a nice date string for the Issue title, e.g., 2025-09-22 (Mon)
+      - name: Make title with date
+        id: mk
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          export TZ=Europe/London
+          TITLE_DATE="$(date +'%Y-%m-%d (%a)')"
+          echo "title=Weekly Copilot Research: EU Techno Festivals — ${TITLE_DATE}" >> $GITHUB_OUTPUT
+
+      - name: Create Issue from prompt
+        if: steps.gate.outputs.run == 'true'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: ${{ steps.mk.outputs.title }}
+          content-file: .github/copilot-prompts/weekly-research.md
+          labels: "research, copilot, automation"
